@@ -35,3 +35,25 @@
 .btn-export-csv:hover {
     background-color: #1e7e34;
 }
+/* --- NEW INFO BUTTON STYLE --- */
+
+.info-btn {
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.info-btn:hover {
+    background-color: #ccc;
+    transform: scale(1.1);
+}

@@ -11,7 +11,9 @@ const PORT = 5000;
 const OWM_API_KEY = process.env.OWM_API_KEY;
 
 //Middleware
-app.use(cors({ origin: 'http://10.6.61.52:3000' }));
+app.use(cors({
+    origin: 'http://localhost:3000' 
+}));
 app.use(express.json());
 
 //Database 

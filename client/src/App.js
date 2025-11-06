@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css'; 
 
-const API_URL = 'http://10.6.61.52:5000/api/weather';
-
+const API_URL = 'http://localhost:5000/api/weather';
 function App() {
-    // --- All your existing state variables ---
+    // --- State Variables ---
     const [location, setLocation] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -15,12 +14,15 @@ function App() {
     const [noteText, setNoteText] = useState('');
     const [error, setError] = useState('');
 
+    // --- NEW: State for the Info Modal ---
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+
     // --- Data Fetching (READ) ---
     useEffect(() => {
         fetch(API_URL).then(res => res.json()).then(data => setHistory(data));
     }, []);
 
-    // --- All your existing functions (handleSubmit, handleDelete, etc.) ---
+    // --- Form Submission (CREATE) ---
     const handleSubmit = (event) => {
         event.preventDefault();
         setError(''); 
@@ -48,6 +50,7 @@ function App() {
         });
     };
 
+    // --- Delete Function (DELETE) ---
     const handleDelete = (id) => {
         fetch(`${API_URL}/${id}`, { method: 'DELETE' })
         .then(res => res.json())
@@ -57,6 +60,7 @@ function App() {
         .catch(err => console.error('Error deleting record:', err));
     };
 
+    // --- Functions to handle the Update Modal (UPDATE) ---
     const openUpdateModal = (record) => {
         setCurrentRecord(record);    
         setNoteText(record.userNote || ''); 
@@ -121,9 +125,7 @@ function App() {
         );
     };
 
-    // --- NEW: Data Export Functions ---
-    
-    // This is a generic helper function to trigger a download
+    // --- Data Export Functions ---
     const downloadFile = (data, fileName, fileType) => {
         const blob = new Blob([data], { type: fileType });
         const a = document.createElement('a');
@@ -134,21 +136,15 @@ function App() {
         document.body.removeChild(a);
     };
 
-    // 1. Export to JSON
     const handleExportJson = () => {
-        const data = JSON.stringify(history, null, 2); // 'null, 2' makes it pretty-printed
+        const data = JSON.stringify(history, null, 2); 
         downloadFile(data, 'weather-history.json', 'application/json');
     };
 
-    // 2. Export to CSV
     const handleExportCsv = () => {
-        // CSVs can't handle nested data well, so we "flatten" it.
-        // One row for each DAY of each search.
         let csvContent = "SearchQuery,ResolvedLocation,Note,Date,MaxTemp,MinTemp\n";
-
         history.forEach(record => {
             const { searchQuery, resolvedLocation, userNote, weatherData } = record;
-            
             weatherData.forEach(day => {
                 const row = [
                     `"${searchQuery}"`,
@@ -161,7 +157,6 @@ function App() {
                 csvContent += row + "\n";
             });
         });
-
         downloadFile(csvContent, 'weather-history.csv', 'text/csv');
     };
 
@@ -169,6 +164,11 @@ function App() {
     // --- The UI (What you see) ---
     return (
         <div className="app-container">
+            {/* --- NEW: Info Button --- */}
+            <button className="info-btn" onClick={() => setIsInfoModalOpen(true)}>
+                i
+            </button>
+            
             <h1>Advanced Weather App</h1>
             
             <form onSubmit={handleSubmit} className="location-input">
@@ -191,7 +191,6 @@ function App() {
                 </div>
             )}
 
-            {/* --- UPDATED: Added Header and Export Buttons --- */}
             <div className="history-header">
                 <h2>Search History</h2>
                 <div className="export-buttons">
@@ -199,7 +198,6 @@ function App() {
                     <button onClick={handleExportCsv} className="btn btn-export-csv">Export CSV</button>
                 </div>
             </div>
-            {/* --- END OF UPDATE --- */}
             
             <div id="forecast-weather">
                 {history.length === 0 ? (
@@ -238,6 +236,35 @@ function App() {
                     </div>
                 </div>
             )}
+
+            {/* --- NEW: The Info Modal UI --- */}
+            {isInfoModalOpen && (
+                <div className="modal-overlay" onClick={() => setIsInfoModalOpen(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h2>About the PM Accelerator Assessment</h2>
+                        <p>Welcome to PM Accelerator, a beacon of guidance for aspiring and experienced PMs alike.
+                            We’ve designed this platform to offer training, education, and job opportunities for Product Managers, creating room for constant improvement and shaping the next generation of PMs. Whether you’re a newbie or you’ve spent years in the industry, you’re guaranteed to find a new opportunity with the help of PM Accelerator.</p>
+
+                        <p>This is a simple app created for the Technical assesment for AI engineer intern post</p>
+                        <strong>What We’re Looking For:</strong>
+                        <ul>
+                            <li>Let users enter a location and get the current weather.</li>
+                            <li>Show the weather clearly, with any useful details.</li>
+                        </ul>
+                        <strong>To Stand Apart:</strong>
+                        <ul>
+                            <li>Add a 5-day forecast.</li>
+                            <li>Let users see the weather based on their current location.</li>
+                            <li>Use icons or images to make the weather info look cool.</li>
+                        </ul>
+                        
+                        <div className="modal-actions">
+                            <button onClick={() => setIsInfoModalOpen(false)}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
         </div>
     );
 }
